@@ -34,24 +34,36 @@ class DownloadThread(QThread):
 
         for artist, songs in self.artists.items():
             for song in songs:
-                if not artist == 'urls':
-                    music_name = song if artist == 'no_artist' else f'{artist} - {song}'
-                    stream = Search(music_name).results[0].streams.get_audio_only()
+                music_name = f'{artist} - {song}'
 
-                    if artist == 'no_artist':
+                try:
+                    if not artist == 'urls':
+                        if artist == 'no_artist':
+                            music_name = song
+
+                        stream = Search(music_name).results[0].streams.get_audio_only()
+
+                        if artist == 'no_artist':
+                            music_name = stream.title
+                    else:
+                        stream = YouTube(song).streams.get_audio_only()
                         music_name = stream.title
-                else:
-                    stream = YouTube(song).streams.get_audio_only()
-                    music_name = stream.title
 
-                stream.download(output_path='temp', filename=music_name + '.mp3')
+                    music_name = remove_forbidden_characters(music_name)
+                    stream.download(output_path='temp', filename=music_name + '.mp3')
 
-                count += 1
-                progress = int((count / self.count) * 100)
-                self.progress_bar.setValue(progress)
+                    count += 1
+                    progress = int((count / self.count) * 100)
+                    self.progress_bar.setValue(progress)
 
-                self.print_on_terminal(highlight=music_name, color='yellow', after=f' baixado com sucesso. ({count} / '
-                                                                                   f'{self.count})')
+                    self.print_on_terminal(highlight=music_name, color='yellow', after=f' baixado com sucesso. '
+                                                                                       f'({count} / {self.count})')
+                except Exception as e:
+                    err = e.message if hasattr(e, 'message') else e
+                    print(f'{e.__class__.__name__} {e.__context__}: {err}')
+
+                    self.print_on_terminal(before='Algo deu errado durante o download da música ',
+                                           highlight=music_name, color='red')
 
         end_time = datetime.now()
         final = end_time - start_time

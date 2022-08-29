@@ -87,3 +87,14 @@ def compact_to_zip(file_path):
 
     zip_file.close()
     return True
+
+
+def remove_forbidden_characters(file_name: str) -> str:
+    forbidden_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+    new_file_name = ''
+
+    for i in file_name:
+        if i not in forbidden_characters:
+            new_file_name += i
+
+    return new_file_name if new_file_name else file_name
