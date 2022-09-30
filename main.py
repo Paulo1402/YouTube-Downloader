@@ -1,103 +1,169 @@
-from functions import *
-from PyQt5.QtWidgets import QWidget, QProgressBar, QTextEdit, QFileDialog
-from PyQt5.QtCore import QThread
-from PyQt5 import QtGui
-from tkinter import messagebox
-from datetime import datetime
-from pytube import Search, YouTube
+import sys
+from utils.worker import *
+from ui.app import Ui_MainWindow
+from PyQt6.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
+from PyQt6.QtGui import QFont, QTextCursor, QPixmap, QIcon
+from PyQt6.QtCore import QThread
+from datetime import timedelta
 
 
-class DownloadThread(QThread):
-    def __init__(self, centralwidget: QWidget, progress_bar: QProgressBar, terminal: QTextEdit, artists: dict,
-                 count: int):
+# Classe principal do aplicativo
+class App(QMainWindow, Ui_MainWindow):
+    def __init__(self):
         super().__init__()
-        self.centralwidget = centralwidget
-        self.progress_bar = progress_bar
-        self.terminal = terminal
-        self.artists = artists
-        self.count = count
 
-    def __del__(self):
-        self.wait()
+        # Cria objetos do aplicativo
+        self.setupUi(self)
 
-    def run(self):
-        start_time = datetime.now()
-        count = 0
+        self.thread: QThread | None = None
+        self.worker: Worker | None = None
 
-        self.print_on_terminal(before='Preparando para começar...')
+        # Conecta eventos
+        self.btDownload.clicked.connect(self.download)
+        self.btImportTxt.clicked.connect(self.import_txt)
 
-        if not os.path.exists('temp'):
-            os.mkdir('temp')
+        # Importa ícones dinamicamente
+        self.setWindowIcon(QIcon('./assets/icon.png'))
+        self.lb_logo.setPixmap(QPixmap('./assets/youtube_logo.png'))
 
-        for file in os.scandir('temp'):
-            os.remove(file.path)
+        # Seta fontes e coloca foco no txtSongs
+        self.txtTerminal.setFont(QFont('Segoe UI', 10))
+        self.txtSongs.setFont(QFont('Segoe UI', 10))
+        self.txtSongs.setFocus()
 
-        for artist, songs in self.artists.items():
-            for song in songs:
-                music_name = f'{artist} - {song}'
+        # Define aliases para constantes
+        self.yes = QMessageBox.StandardButton.Yes
+        self.no = QMessageBox.StandardButton.No
 
-                try:
-                    if not artist == 'urls':
-                        if artist == 'no_artist':
-                            music_name = song
+        # Cria um template de uma messagebox para uso posterior
+        self.popup = QMessageBox(self)
+        self.popup.setStandardButtons(self.yes | self.no)
+        self.popup.setDefaultButton(self.yes)
 
-                        stream = Search(music_name).results[0].streams.get_audio_only()
+        # Altera o caption padrão
+        self.popup.button(self.yes).setText('Sim')
+        self.popup.button(self.no).setText('Não')
 
-                        if artist == 'no_artist':
-                            music_name = stream.title
-                    else:
-                        stream = YouTube(song).streams.get_audio_only()
-                        music_name = stream.title
+    # Evento disparado ao tentar fechar o aplicativo
+    def closeEvent(self, event):
+        if self.thread and self.thread.isRunning():
+            # Executa um popup e aguarda resposta do usuário
+            self.popup.setWindowTitle('ATENÇÃO')
+            self.popup.setText('Processo em andamento!\nDeseja sair mesmo assim?')
+            self.popup.setDefaultButton(self.no)
+            self.popup.setIcon(QMessageBox.Icon.Warning)
 
-                    music_name = remove_forbidden_characters(music_name)
-                    stream.download(output_path='temp', filename=music_name + '.mp3')
+            answer = self.popup.exec()
 
-                    count += 1
-                    progress = int((count / self.count) * 100)
-                    self.progress_bar.setValue(progress)
+            if answer == 'no':
+                event.ignore()
+                return
 
-                    self.print_on_terminal(highlight=music_name, color='yellow', after=f' baixado com sucesso. '
-                                                                                       f'({count} / {self.count})')
-                except Exception as e:
-                    err = e.message if hasattr(e, 'message') else e
-                    print(f'{e.__class__.__name__} {e.__context__}: {err}')
+        event.accept()
 
-                    self.print_on_terminal(before='Algo deu errado durante o download da música ',
-                                           highlight=music_name, color='red')
+    # Importa um arquivo .txt para dentro do aplicativo
+    def import_txt(self):
+        path = QFileDialog.getOpenFileName(self.centralwidget, 'Importar .txt', '.', 'txt (*.txt)')[0]
 
-        end_time = datetime.now()
-        final = end_time - start_time
+        if path:
+            encoding = get_encoding(path)
 
-        duration = str(final).split('.')[0]
-        media = str(final / self.count).split('.')[0]
+            with open(path, 'r', encoding=encoding) as txt:
+                self.txtSongs.clear()
+                self.txtSongs.setText(txt.read())
 
-        self.print_on_terminal(before='-' * 80)
-        self.print_on_terminal(before='Tarefa concluída. ', highlight=str(self.count), color='blue', after=' música(s) '
-                                                                                                           'baixadas '
-                                                                                                           'com '
-                                                                                                           'sucesso.')
-        self.print_on_terminal(before='Tempo de execução: ', highlight=duration, color='magenta')
-        self.print_on_terminal(before='Média de ', highlight=media, color='red', after=' por música.')
-
-        messagebox.showinfo('AVISO', 'Download Concluído.')
-
-        path = QFileDialog.getSaveFileName(self.centralwidget, 'Salvar em', 'Músicas_Baixadas')[0]
-
-        if compact_to_zip(path):
-            messagebox.showinfo('AVISO', 'Músicas compactadas com sucesso..')
-
-    def print_on_terminal(self, before: str = '', after: str = '', highlight: str = '', color: str = 'red'):
-        if not before and not after and not highlight:
+    # Baixa lista do YouTube
+    def download(self):
+        if self.thread and self.thread.isRunning():
+            QMessageBox.warning(self.centralwidget, 'ATENÇÃO', 'Já existe um processo em andamento, por favor aguarde.',
+                                QMessageBox.StandardButton.Ok)
             return
 
-        html = f'<p style="line-height:1">{before}'
+        # Pega o texto armazenado no aplicativo
+        song_list = self.txtSongs.toPlainText()
+        print(song_list)
 
-        if highlight:
-            html += f'<span style="color:{color}">{highlight}</span>'
+        # Armazena em um arquivo .txt para facilitar a manipulação
+        with open('list.txt', 'w') as txt:
+            txt.write(song_list)
 
-        html += f'{after}</p>'
-        self.terminal.append(html)
+        # Retorna um dicionário com a lista de músicas e a quantidade total
+        artists, count = get_songs('list.txt')
 
-        cursor = self.terminal.textCursor()
-        cursor.movePosition(QtGui.QTextCursor.End)
-        self.terminal.setTextCursor(cursor)
+        if not count:
+            QMessageBox.critical(self, 'ATENÇÃO', 'Nenhuma música encontrada, verifique por favor. '
+                                 'Na dúvida clique no botão ajuda.', QMessageBox.StandardButton.Ok)
+            return
+
+        # Estima o tempo da operação
+        estimate = str(timedelta(seconds=count * 3))
+
+        # Executa um popup e aguarda resposta do usuário
+        self.popup.setWindowTitle('ATENÇÃO')
+        self.popup.setText(f'Deseja fazer o download? \nTempo estimado: {estimate}')
+        self.popup.setIcon(QMessageBox.Icon.Information)
+
+        answer = self.popup.exec()
+
+        if answer == self.no:
+            return
+
+        # Limpa o terminal
+        self.txtTerminal.clear()
+
+        # Prepara a thread que irá realizar os downloads
+        self.thread = QThread()
+        self.worker = Worker(artists, count)
+
+        self.worker.moveToThread(self.thread)
+
+        # Conecta eventos
+        self.thread.started.connect(self.worker.run)
+
+        self.worker.finished.connect(self.finished_thread)
+        self.worker.progress.connect(lambda x: self.progressBar.setValue(x))
+        self.worker.print_on_terminal.connect(lambda x: self.print_on_terminal(x))
+
+        # Inicia os downloads
+        self.thread.start()
+
+    # Printa no terminal informações durante o download
+    def print_on_terminal(self, text):
+        self.txtTerminal.append(text)
+
+        # Move cursor para o fim do texto
+        cursor = self.txtTerminal.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+
+        self.txtTerminal.setTextCursor(cursor)
+
+    # Elimina variáveis da memória e prepara para comprimir download
+    def finished_thread(self):
+        # Elimina variáveis
+        self.thread.quit()
+        self.thread.deleteLater()
+        self.worker.deleteLater()
+        self.thread = None
+
+        # Informa o usuário que o processo terminou
+        QMessageBox.information(self, 'AVISO', 'Download Concluído.', QMessageBox.StandardButton.Ok)
+        path = QFileDialog.getSaveFileName(self, 'Salvar em', 'Músicas_Baixadas')[0]
+
+        # Comprime download em um arquivo .zip
+        if compact_to_zip(path):
+            QMessageBox.information(self, 'AVISO', 'Músicas compactadas com sucesso.', QMessageBox.StandardButton.Ok)
+
+
+# Usado para auxiliar na depuração
+def exception_hook(exctype, value, traceback):
+    sys.__excepthook__(exctype, value, traceback)
+    sys.exit(1)
+
+
+if __name__ == "__main__":
+    sys.excepthook = exception_hook
+    qt = QApplication(sys.argv)
+    app = App()
+    app.show()
+
+    sys.exit(qt.exec())
