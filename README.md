@@ -6,10 +6,10 @@ Aplicativo desktop (Windows) para baixar lista de vídeos do YouTube em formato 
 
 ## 🕹 Como Usar
 O aplicativo segue o seguinte algoritmo para baixar a lista: <br>
-Use um '*' no começo da linha e em seguida insira o nome do artista, logo abaixo insira apenas o nome de uma
+Use um "\*" no começo da linha e em seguida insira o nome do artista, logo abaixo insira apenas o nome de uma
 música por linha. Dessa forma o aplicativo irá procurar pelo nome do artista e pela música para garantir que você
 terá exatamente o que queria.
-Para alterar o artista basta na próxima linha começar novamente com o character '*' e assim por diante.
+Para alterar o artista basta na próxima linha começar novamente com um "\*" e assim por diante.
 
 ![example1](./.github/example1.png)
 
