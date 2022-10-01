@@ -129,8 +129,9 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.txtTerminal.sizePolicy().hasHeightForWidth())
         self.txtTerminal.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
+        font.setPointSize(10)
         font.setBold(False)
-        font.setItalic(True)
+        font.setItalic(False)
         self.txtTerminal.setFont(font)
         self.txtTerminal.viewport().setProperty("cursor", QtGui.QCursor(QtCore.Qt.CursorShape.ArrowCursor))
         self.txtTerminal.setAutoFillBackground(False)
@@ -140,6 +141,7 @@ class Ui_MainWindow(object):
         self.txtTerminal.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         self.txtTerminal.setLineWidth(2)
         self.txtTerminal.setMidLineWidth(2)
+        self.txtTerminal.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.txtTerminal.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustToContentsOnFirstShow)
         self.txtTerminal.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.WidgetWidth)
         self.txtTerminal.setReadOnly(True)
@@ -170,15 +172,15 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.txtSongs.sizePolicy().hasHeightForWidth())
         self.txtSongs.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        self.txtSongs.setFont(font)
         self.txtSongs.setStyleSheet("border: 1px solid black")
         self.txtSongs.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.WidgetWidth)
         self.txtSongs.setPlaceholderText("")
         self.txtSongs.setObjectName("txtSongs")
         self.gridLayout.addWidget(self.txtSongs, 4, 0, 2, 3)
         MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 681, 22))
         self.menuBar.setObjectName("menuBar")
@@ -202,15 +204,15 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "hr { height: 1px; border-width: 0; }\n"
-"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:italic;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:10pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt; font-style:italic;\"><br /></p></body></html>"))
         self.label.setText(_translate("MainWindow", "ESCREVA ABAIXO OU \n"
 "IMPORTE UM ARQUIVO .TXT"))
         self.txtSongs.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "hr { height: 1px; border-width: 0; }\n"
-"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+"</style></head><body style=\" font-family:\'Segoe UI\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;\"><br /></p></body></html>"))
         self.menuAjuda.setTitle(_translate("MainWindow", "Ajuda"))
         self.actionComo_Usar.setText(_translate("MainWindow", "Como Usar"))

@@ -1,13 +1,20 @@
 import sys
+import webbrowser
 from utils.worker import *
 from ui.app import Ui_MainWindow
 from PyQt6.QtWidgets import QMainWindow, QApplication, QMessageBox, QFileDialog
-from PyQt6.QtGui import QFont, QTextCursor, QPixmap, QIcon
+from PyQt6.QtGui import QTextCursor, QPixmap, QIcon
 from PyQt6.QtCore import QThread
 from datetime import timedelta
 
+# Tela feita usando Qt Designer e convertida para Python com a biblioteca PyQt6 (pyuic6)
+# Armazenado em ui/app.py
+
+
+# BUG NO SEM ARTISTAS
 
 # Classe principal do aplicativo
+# noinspection PyUnresolvedReferences
 class App(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
@@ -15,6 +22,7 @@ class App(QMainWindow, Ui_MainWindow):
         # Cria objetos do aplicativo
         self.setupUi(self)
 
+        # Instancia variáveis
         self.thread: QThread | None = None
         self.worker: Worker | None = None
 
@@ -26,10 +34,12 @@ class App(QMainWindow, Ui_MainWindow):
         self.setWindowIcon(QIcon('./assets/icon.png'))
         self.lb_logo.setPixmap(QPixmap('./assets/youtube_logo.png'))
 
-        # Seta fontes e coloca foco no txtSongs
-        self.txtTerminal.setFont(QFont('Segoe UI', 10))
-        self.txtSongs.setFont(QFont('Segoe UI', 10))
+        # Coloca foco no txtSongs
         self.txtSongs.setFocus()
+
+        # Abre o navegador ao clicar no botão de ajuda
+        self.actionComo_Usar.triggered.connect(lambda: webbrowser.open('https://github.com/Paulo1402/YouTube'
+                                                                       '-Downloader#ComoUsar'))
 
         # Define aliases para constantes
         self.yes = QMessageBox.StandardButton.Yes
@@ -46,6 +56,7 @@ class App(QMainWindow, Ui_MainWindow):
 
     # Evento disparado ao tentar fechar o aplicativo
     def closeEvent(self, event):
+        # Se a thread estiver em execução
         if self.thread and self.thread.isRunning():
             # Executa um popup e aguarda resposta do usuário
             self.popup.setWindowTitle('ATENÇÃO')
@@ -55,7 +66,7 @@ class App(QMainWindow, Ui_MainWindow):
 
             answer = self.popup.exec()
 
-            if answer == 'no':
+            if answer == self.no:
                 event.ignore()
                 return
 
@@ -74,6 +85,7 @@ class App(QMainWindow, Ui_MainWindow):
 
     # Baixa lista do YouTube
     def download(self):
+        # Informa o usuário caso o processo já esteja em andamento
         if self.thread and self.thread.isRunning():
             QMessageBox.warning(self.centralwidget, 'ATENÇÃO', 'Já existe um processo em andamento, por favor aguarde.',
                                 QMessageBox.StandardButton.Ok)
@@ -81,14 +93,9 @@ class App(QMainWindow, Ui_MainWindow):
 
         # Pega o texto armazenado no aplicativo
         song_list = self.txtSongs.toPlainText()
-        print(song_list)
-
-        # Armazena em um arquivo .txt para facilitar a manipulação
-        with open('list.txt', 'w') as txt:
-            txt.write(song_list)
 
         # Retorna um dicionário com a lista de músicas e a quantidade total
-        artists, count = get_songs('list.txt')
+        artists, count = get_songs(song_list)
 
         if not count:
             QMessageBox.critical(self, 'ATENÇÃO', 'Nenhuma música encontrada, verifique por favor. '
@@ -127,7 +134,7 @@ class App(QMainWindow, Ui_MainWindow):
         # Inicia os downloads
         self.thread.start()
 
-    # Printa no terminal informações durante o download
+    # Printa no terminal informações durante o baixar
     def print_on_terminal(self, text):
         self.txtTerminal.append(text)
 
@@ -147,11 +154,15 @@ class App(QMainWindow, Ui_MainWindow):
 
         # Informa o usuário que o processo terminou
         QMessageBox.information(self, 'AVISO', 'Download Concluído.', QMessageBox.StandardButton.Ok)
-        path = QFileDialog.getSaveFileName(self, 'Salvar em', 'Músicas_Baixadas')[0]
+        path = QFileDialog.getSaveFileName(self, 'Salvar em', 'Songs')[0]
 
         # Comprime download em um arquivo .zip
-        if compact_to_zip(path):
+        if path:
+            compact_to_zip(path)
             QMessageBox.information(self, 'AVISO', 'Músicas compactadas com sucesso.', QMessageBox.StandardButton.Ok)
+
+        # Remove pasta temporária
+        shutil.rmtree('./temp', ignore_errors=True)
 
 
 # Usado para auxiliar na depuração
@@ -160,6 +171,7 @@ def exception_hook(exctype, value, traceback):
     sys.exit(1)
 
 
+# Inicia o aplicativo
 if __name__ == "__main__":
     sys.excepthook = exception_hook
     qt = QApplication(sys.argv)

@@ -86,7 +86,7 @@ class Worker(QObject):
 
         # Informa o usuário
         self.to_html(before='-' * 40)
-        self.to_html(before='Tarefa concluída. ', highlight=str(self.count), color='blue',
+        self.to_html(before='Tarefa concluída. ', highlight=str(self.count), color='cyan',
                      after=' música(s) baixadas com sucesso.')
         self.to_html(before='Tempo de execução: ', highlight=duration, color='magenta')
         self.to_html(before='Média de ', highlight=media, color='red', after=' por música.')
