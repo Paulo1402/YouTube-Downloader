@@ -7,11 +7,9 @@ from PyQt6.QtGui import QTextCursor, QPixmap, QIcon
 from PyQt6.QtCore import QThread
 from datetime import timedelta
 
+
 # Tela feita usando Qt Designer e convertida para Python com a biblioteca PyQt6 (pyuic6)
 # Armazenado em ui/app.py
-
-
-# BUG NO SEM ARTISTAS
 
 # Classe principal do aplicativo
 # noinspection PyUnresolvedReferences
@@ -39,7 +37,7 @@ class App(QMainWindow, Ui_MainWindow):
 
         # Abre o navegador ao clicar no botão de ajuda
         self.actionComo_Usar.triggered.connect(lambda: webbrowser.open('https://github.com/Paulo1402/YouTube'
-                                                                       '-Downloader#ComoUsar'))
+                                                                       '-Downloader#-como-usar'))
 
         # Define aliases para constantes
         self.yes = QMessageBox.StandardButton.Yes
@@ -99,7 +97,7 @@ class App(QMainWindow, Ui_MainWindow):
 
         if not count:
             QMessageBox.critical(self, 'ATENÇÃO', 'Nenhuma música encontrada, verifique por favor. '
-                                 'Na dúvida clique no botão ajuda.', QMessageBox.StandardButton.Ok)
+                                                  'Na dúvida clique no botão ajuda.', QMessageBox.StandardButton.Ok)
             return
 
         # Estima o tempo da operação

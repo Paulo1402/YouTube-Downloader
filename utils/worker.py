@@ -85,8 +85,8 @@ class Worker(QObject):
         media = str(final / self.count).split('.')[0]
 
         # Informa o usuário
-        self.to_html(before='-' * 40)
-        self.to_html(before='Tarefa concluída. ', highlight=str(self.count), color='cyan',
+        self.to_html(before='-' * 48)
+        self.to_html(before='Lista concluída. ', highlight=str(self.count), color='cyan',
                      after=' música(s) baixadas com sucesso.')
         self.to_html(before='Tempo de execução: ', highlight=duration, color='magenta')
         self.to_html(before='Média de ', highlight=media, color='red', after=' por música.')
