@@ -1,14 +1,9 @@
 import os
-import zipfile
-import shutil
 import logging
 from utils.functions import *
 from PyQt6.QtCore import QObject, pyqtSignal
 from datetime import datetime
 from pytube import Search, YouTube
-
-
-logging.basicConfig(filename='.log', filemode='w', format='%(asctime)s - %(message)s', datefmt='%d/%m/%y %H:%M:%S')
 
 
 # noinspection PyUnresolvedReferences
@@ -17,7 +12,6 @@ class Worker(QObject):
     print_on_terminal = pyqtSignal(str)
     progress = pyqtSignal(int)
     finished = pyqtSignal()
-    compacting = pyqtSignal()
 
     def __init__(self, artists: dict, count: int, path: str):
         super().__init__()
@@ -26,49 +20,19 @@ class Worker(QObject):
         self.count = count
         self.path = path
 
+        self.logger: logging.Logger | None = None
         self.err_count = 0
-
-    # Compacta conteúdo da pasta temporária em um arquivo .zip
-    def compact_to_zip(self, file_path):
-        count = 0
-        zip_file = zipfile.ZipFile(file_path + '.zip', 'w')
-
-        for root, dirs, files in os.walk('./temp'):
-            for file in files:
-                fullpath = os.path.join(root, file)
-                zip_file.write(fullpath, file, compress_type=zipfile.ZIP_DEFLATED)
-
-                # Define progresso atual
-                count += 1
-                progress = int((count / self.count) * 100)
-
-                # Emite sinal para atualizar a barra de progresso
-                self.progress.emit(progress)
-
-        zip_file.close()
 
     def run(self):
         # Salva início da thread
         start_time = datetime.now()
-
         self.to_html(before='Preparando para começar...')
 
         if not os.path.exists(self.path):
             os.mkdir(self.path)
 
-        # Prepara uma pasta temporária
-        # shutil.rmtree('./temp', ignore_errors=True)
-        # os.mkdir('./temp')
-
         # Realiza o loop
         self.download()
-
-        # Inicia a compactação dos arquivos
-        # self.compacting.emit()
-        # self.compact_to_zip(self.path)
-
-        # Remove pasta temporária
-        # shutil.rmtree('./temp', ignore_errors=True)
 
         # Calcula tempo de execução e média
         end_time = datetime.now()
@@ -86,7 +50,6 @@ class Worker(QObject):
         if self.err_count:
             self.to_html(highlight=(str(self.err_count), 'red'), after=' música(s) com falha. Consulte o arquivo .log '
                          'salvo na pasta de destino para mais informações.')
-            shutil.copy('.log', self.path)
 
         self.to_html(before='Tempo de execução: ', highlight=(duration, 'magenta'))
         self.to_html(before='Média de ', highlight=(media, 'green'), after=' por música.')
@@ -132,14 +95,17 @@ class Worker(QObject):
                                                                          f'({count} / {self.count})')
                 # Alerta usuário via terminal sobre possíveis erros
                 except Exception as e:
-                    self.err_count += 1
+                    self.to_html(before='Algo deu errado durante o download da música ', highlight=(music_name, 'red'))
 
                     err = e.message if hasattr(e, 'message') else e
                     error = f'Algo deu errado durante o download da música {music_name}\n'\
-                            f'{e.__class__.__name__} {e.__context__}: {err}'
-                    logging.warning(error)
+                            f'{e.__class__.__name__} {e.__context__}: {err}\n'
 
-                    self.to_html(before='Algo deu errado durante o download da música ', highlight=(music_name, 'red'))
+                    if not self.logger:
+                        self.create_logger()
+
+                    self.logger.error(error)
+                    self.err_count += 1
                 finally:
                     # Define progresso atual
                     count += 1
@@ -147,6 +113,16 @@ class Worker(QObject):
 
                     # Emite sinal para atualizar a barra de progresso
                     self.progress.emit(progress)
+
+    def create_logger(self):
+        formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%d/%m/%y %H:%M:%S')
+
+        handler = logging.FileHandler(os.path.join(self.path, '.log'), 'w')
+        handler.setFormatter(formatter)
+        handler.setLevel(logging.ERROR)
+
+        self.logger = logging.getLogger(__name__)
+        self.logger.addHandler(handler)
 
     # Monta a estrutura em HTML
     def to_html(self, before: str = '', highlight: tuple[str, str] = None, after: str = ''):

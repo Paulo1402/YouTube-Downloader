@@ -28,7 +28,6 @@ uma linha.
 
 - É possível importar um arquivo .txt já preparado, ou previamente configurado para dentro do aplicativo.
 - O terminal ao lado mantém o usuário informado durante o processo.
-- Cria um arquivo .zip automaticamente ao final em um diretório escolhido pelo usuário.
 - Faz uma previsão do tempo necessário para concluir a lista.
 
 ## 🛠 Tecnologias

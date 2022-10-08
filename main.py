@@ -137,7 +137,6 @@ class App(QMainWindow, Ui_MainWindow):
         self.thread.started.connect(self.worker.run)
 
         self.worker.finished.connect(self.finished_thread)
-        self.worker.compacting.connect(lambda: self.lb_action.setText('COMPACTANDO...'))
         self.worker.progress.connect(lambda x: self.progress_bar.setValue(x))
         self.worker.print_on_terminal.connect(lambda x: self.print_on_terminal(x))
 
