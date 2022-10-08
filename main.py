@@ -25,15 +25,15 @@ class App(QMainWindow, Ui_MainWindow):
         self.worker: Worker | None = None
 
         # Conecta eventos
-        self.btDownload.clicked.connect(self.download)
-        self.btImportTxt.clicked.connect(self.import_txt)
+        self.bt_download.clicked.connect(self.download)
+        self.bt_import_txt.clicked.connect(self.import_txt)
 
         # Importa ícones dinamicamente
         self.setWindowIcon(QIcon('./assets/icon.png'))
         self.lb_logo.setPixmap(QPixmap('./assets/youtube_logo.png'))
 
-        # Coloca foco no txtSongs
-        self.txtSongs.setFocus()
+        # Coloca foco no txt_songs
+        self.txt_songs.setFocus()
 
         # Abre o navegador ao clicar no botão de ajuda
         self.actionComo_Usar.triggered.connect(lambda: webbrowser.open('https://github.com/Paulo1402/YouTube'
@@ -78,19 +78,24 @@ class App(QMainWindow, Ui_MainWindow):
             encoding = get_encoding(path)
 
             with open(path, 'r', encoding=encoding) as txt:
-                self.txtSongs.clear()
-                self.txtSongs.setText(txt.read())
+                self.txt_songs.clear()
+                self.txt_songs.setText(txt.read())
 
     # Baixa lista do YouTube
     def download(self):
         # Informa o usuário caso o processo já esteja em andamento
         if self.thread and self.thread.isRunning():
-            QMessageBox.warning(self.centralwidget, 'ATENÇÃO', 'Já existe um processo em andamento, por favor aguarde.',
+            QMessageBox.warning(self, 'ATENÇÃO', 'Já existe um processo em andamento, por favor aguarde.',
                                 QMessageBox.StandardButton.Ok)
             return
 
+        # Verifica se há conexão com a internet
+        if not check_connection():
+            QMessageBox.critical(self, 'ERRO', 'Não há conexão com a internet.', QMessageBox.StandardButton.Ok)
+            return
+
         # Pega o texto armazenado no aplicativo
-        song_list = self.txtSongs.toPlainText()
+        song_list = self.txt_songs.toPlainText()
 
         # Retorna um dicionário com a lista de músicas e a quantidade total
         artists, count = get_songs(song_list)
@@ -101,7 +106,7 @@ class App(QMainWindow, Ui_MainWindow):
             return
 
         # Estima o tempo da operação
-        estimate = str(timedelta(seconds=count * 3))
+        estimate = str(timedelta(seconds=count * 4))
 
         # Executa um popup e aguarda resposta do usuário
         self.popup.setWindowTitle('ATENÇÃO')
@@ -113,12 +118,18 @@ class App(QMainWindow, Ui_MainWindow):
         if answer == self.no:
             return
 
+        path = QFileDialog.getSaveFileName(self, 'Salvar em', 'Songs')[0]
+
+        if not path:
+            QMessageBox.warning(self, 'ATENÇÃO', 'Nenhum diretório especificado.', QMessageBox.StandardButton.Ok)
+            return
+
         # Limpa o terminal
-        self.txtTerminal.clear()
+        self.txt_terminal.clear()
 
         # Prepara a thread que irá realizar os downloads
         self.thread = QThread()
-        self.worker = Worker(artists, count)
+        self.worker = Worker(artists, count, path)
 
         self.worker.moveToThread(self.thread)
 
@@ -126,23 +137,25 @@ class App(QMainWindow, Ui_MainWindow):
         self.thread.started.connect(self.worker.run)
 
         self.worker.finished.connect(self.finished_thread)
-        self.worker.progress.connect(lambda x: self.progressBar.setValue(x))
+        self.worker.compacting.connect(lambda: self.lb_action.setText('COMPACTANDO...'))
+        self.worker.progress.connect(lambda x: self.progress_bar.setValue(x))
         self.worker.print_on_terminal.connect(lambda x: self.print_on_terminal(x))
 
-        # Inicia os downloads
+        # Inicia o download
+        self.lb_action.setText('BAIXANDO...')
         self.thread.start()
 
-    # Printa no terminal informações durante o baixar
+    # Printa no terminal informações
     def print_on_terminal(self, text):
-        self.txtTerminal.append(text)
+        self.txt_terminal.append(text)
 
         # Move cursor para o fim do texto
-        cursor = self.txtTerminal.textCursor()
+        cursor = self.txt_terminal.textCursor()
         cursor.movePosition(QTextCursor.MoveOperation.End)
 
-        self.txtTerminal.setTextCursor(cursor)
+        self.txt_terminal.setTextCursor(cursor)
 
-    # Elimina variáveis da memória e prepara para comprimir download
+    # Elimina variáveis da memória e informa o usuário
     def finished_thread(self):
         # Elimina variáveis
         self.thread.quit()
@@ -152,15 +165,8 @@ class App(QMainWindow, Ui_MainWindow):
 
         # Informa o usuário que o processo terminou
         QMessageBox.information(self, 'AVISO', 'Download Concluído.', QMessageBox.StandardButton.Ok)
-        path = QFileDialog.getSaveFileName(self, 'Salvar em', 'Songs')[0]
-
-        # Comprime download em um arquivo .zip
-        if path:
-            compact_to_zip(path)
-            QMessageBox.information(self, 'AVISO', 'Músicas compactadas com sucesso.', QMessageBox.StandardButton.Ok)
-
-        # Remove pasta temporária
-        shutil.rmtree('./temp', ignore_errors=True)
+        self.progress_bar.setValue(0)
+        self.lb_action.setText('...')
 
 
 # Usado para auxiliar na depuração

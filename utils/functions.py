@@ -1,6 +1,5 @@
-import os
-import zipfile
 import chardet
+import socket
 
 
 # Lê arquivo de texto temporário e define dicionário com base em um algoritmo
@@ -72,18 +71,6 @@ def get_encoding(file_name):
     return encoding
 
 
-# Compacta conteúdo da pasta temporária em um arquivo .zip
-def compact_to_zip(file_path):
-    zip_file = zipfile.ZipFile(file_path + '.zip', 'w')
-
-    for root, dirs, files in os.walk('./temp'):
-        for file in files:
-            fullpath = os.path.join(root, file)
-            zip_file.write(fullpath, file, compress_type=zipfile.ZIP_DEFLATED)
-
-    zip_file.close()
-
-
 # Remove caracteres proibidos no Windows
 def remove_forbidden_characters(file_name: str) -> str:
     forbidden_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
@@ -94,3 +81,12 @@ def remove_forbidden_characters(file_name: str) -> str:
             new_file_name += i
 
     return new_file_name if new_file_name else file_name
+
+
+# Checa se o usuário está conectado a internet
+def check_connection():
+    try:
+        socket.create_connection(('www.google.com', 80))
+        return True
+    except OSError:
+        return False
