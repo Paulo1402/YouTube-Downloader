@@ -1,37 +1,62 @@
-# ❤ YouTube Downloader Mp3
+# ❤ YouTube Downloader
 
-Aplicativo desktop (Windows) para baixar lista de vídeos do YouTube em formato mp3.
+Aplicativo desktop (Windows) para baixar lista de vídeos do YouTube em formatos mp3 e mp4.
 
 ![preview](./.github/preview.png)
 
 ## 🕹 Como Usar
-O aplicativo segue o seguinte algoritmo para baixar a lista: <br>
-Use um "**\***" no começo da linha como prefixo e em seguida insira o nome do artista, logo abaixo insira o nome de uma
-música por linha. Dessa forma o aplicativo irá procurar pelo nome do artista e pela música para garantir que você
-terá exatamente o que queria.
-Para alterar o artista basta na próxima linha começar novamente com um "**\***" e assim por diante.
+O app consiste em duas formas de buscas:
 
-![example1](./.github/example1.png)
+### Procurar por nome
 
-Também é possível buscar apenas pelo nome da música ao colocar somente o nome dela. Caso haja inserido algum artista
-anteriormente pule uma linha e escreva na próxima.
+![example1](./.github/search_by_name.png)
 
-![example2](./.github/example2.png)
+Insira o nome do artista e escolha o formato, no campo 'vídeo' digite o nome do vídeo que deseja buscar e em seguida
+clique no botão ao lado. 
 
-O último recurso é inserir apenas a url do vídeo. Respeitando o exemplo anterior, caso haja um artista na sequência pule
-uma linha.
+É possível omitir o artista caso não ache necessário especificar, nesse caso as mídias inseridas
+serão salvas com a chave 'Sem Artista'.
 
-![example2](./.github/example3.png)
+Obs: Na busca por nome o resultado é sempre o primeiro retornado, ou seja, ao não especificar um artista pode ser
+retornado um resultado indesejado dependendo do quão genérico for a pesquisa.
+
+### Procurar por URL
+
+![example1](./.github/search_by_url.png)
+
+Escolha o formato e insira a URL desejada no campo 'vídeo' e em seguida clique no botão ao lado. 
+É aceito tanto URLs para vídeos quanto também para playlists, desde que sigam o seguinte padrão:
+- https://www.youtube.com/watch?v=[ID DO VÍDEO]
+- https://www.youtube.com/playlist?list=[ID DA PLAYLIST]
+
+Obs: O subdomínio 'www.' não é necessário.
+
+---
+
+Você pode inserir quantos itens você quiser com a mesma configuração. Quando terminar, clique
+no botão 'ADICIONAR' e sua busca será processada e armazenada visualmente na lista ao lado.
+
+Você pode continuar inserindo outras mídias de diferentes artistas e configurações, inclusive mesclando modos de busca,
+para só depois começar a baixar.
+
+Caso queira remover uma mídia adicionada tanto na lista de adição quanto na lista de download
+basta usar o botão direito do mouse e clicar em 'Deletar'.
+
+![example1](./.github/delete_item.png)
+
+## 📌 Atalhos 
+- Botão download (CTRL + D)
+- Botão adicionar (CTRL + A)
+- Botão inserir mídia (ENTER quando estiver com o campo 'vídeo' em foco)
 
 
 ## ⚙ Funcionalidades
-
-- É possível importar um arquivo .txt já preparado, ou previamente configurado para dentro do aplicativo.
-- O terminal ao lado mantém o usuário informado durante o processo.
-- Faz uma previsão do tempo necessário para concluir a lista.
+- Intuitivo e fácil de usar.
+- Mantem organizado os downloads em pastas separadas de acorda com a estrutura montada.
+- Terminal para manter usuário informado durante o processo.
+- Caso algum erro ocorra durante o download é criado um arquivo de log com informaões sobre o erro na pasta especificada.
 
 ## 🛠 Tecnologias
-
 - Python
 - PyQt6
 - pytube
