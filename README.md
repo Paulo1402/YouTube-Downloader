@@ -11,7 +11,7 @@ O app consiste em duas formas de buscas:
 
 ![example1](./.github/search_by_name.png)
 
-Insira o nome do artista e escolha o formato, no campo 'vídeo' digite o nome do vídeo que deseja buscar e em seguida
+Insira o nome do artista e escolha o formato, no campo `VÍDEOS` digite o nome do vídeo que deseja buscar e em seguida
 clique no botão ao lado. 
 
 É possível omitir o artista caso não ache necessário especificar, nesse caso as mídias inseridas
@@ -24,37 +24,36 @@ retornado um resultado indesejado dependendo do quão genérico for a pesquisa.
 
 ![example1](./.github/search_by_url.png)
 
-Escolha o formato e insira a URL desejada no campo 'vídeo' e em seguida clique no botão ao lado. 
+Escolha o formato e insira a URL desejada no campo `VÍDEOS` e em seguida clique no botão ao lado. 
 É aceito tanto URLs para vídeos quanto também para playlists, desde que sigam o seguinte padrão:
-- https://www.youtube.com/watch?v=[ID DO VÍDEO]
-- https://www.youtube.com/playlist?list=[ID DA PLAYLIST]
+- `https://www.youtube.com/watch?v=[ID DO VÍDEO]`
+- `https://www.youtube.com/playlist?list=[ID DA PLAYLIST]`
 
-Obs: O subdomínio 'www.' não é necessário.
+Obs: O subdomínio `www.` não é necessário.
 
 ---
 
 Você pode inserir quantos itens você quiser com a mesma configuração. Quando terminar, clique
-no botão 'ADICIONAR' e sua busca será processada e armazenada visualmente na lista ao lado.
+no botão `ADICIONAR` e sua busca será processada e armazenada visualmente na lista ao lado.
 
 Você pode continuar inserindo outras mídias de diferentes artistas e configurações, inclusive mesclando modos de busca,
 para só depois começar a baixar.
 
 Caso queira remover uma mídia adicionada tanto na lista de adição quanto na lista de download
-basta usar o botão direito do mouse e clicar em 'Deletar'.
+basta usar o botão direito do mouse e clicar em `Deletar`.
 
 ![example1](./.github/delete_item.png)
 
 ## 📌 Atalhos 
-- Botão download (CTRL + D)
-- Botão adicionar (CTRL + A)
-- Botão inserir mídia (ENTER quando estiver com o campo 'vídeo' em foco)
+- Botão download (CTRL + D).
+- Botão adicionar (CTRL + A).
+- Botão inserir mídia (ENTER quando estiver com o campo 'vídeo' em foco).
 
 
 ## ⚙ Funcionalidades
-- Intuitivo e fácil de usar.
-- Mantem organizado os downloads em pastas separadas de acorda com a estrutura montada.
 - Terminal para manter usuário informado durante o processo.
-- Caso algum erro ocorra durante o download é criado um arquivo de log com informaões sobre o erro na pasta especificada.
+- Mantem organizado os downloads seguindo a estrutura visual da lista.
+- Caso algum erro ocorra durante o download é criado um arquivo de log com informações sobre o erro na pasta de destino.
 
 ## 🛠 Tecnologias
 - Python
