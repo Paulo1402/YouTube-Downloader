@@ -22,6 +22,7 @@ __all__ = [
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 
 
+# Retorna dados antigos ou um objeto novo
 def get_old_data(data: dict, key: str, if_not_exists: list | dict):
     try:
         old_data = data[key]
@@ -31,6 +32,7 @@ def get_old_data(data: dict, key: str, if_not_exists: list | dict):
     return old_data
 
 
+# Retorna quantidade de mídias
 def count_media(data: dict):
     count = 0
 
@@ -42,16 +44,19 @@ def count_media(data: dict):
     return count
 
 
+# Verifica se é um link de vídeo do YouTube
 def is_youtube_url(url: str):
     match = re.match(r"http(s)?://(www.)?youtube\.com/watch\?v=|youtu\.be/", url)
     return bool(match)
 
 
+# Verifica se é um link de playlist do YouTube
 def is_youtube_playlist_url(url: str):
     match = re.match(r'http(s)?://(www.)?youtube\.com/playlist\?list=', url)
     return bool(match)
 
 
+# Organiza dados
 def sort_dict(data: tuple):
     if data[0] == 'no_artist':
         return 'z' * 100

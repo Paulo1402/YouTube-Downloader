@@ -353,6 +353,9 @@
            <property name="text">
             <string>PROCURAR POR</string>
            </property>
+           <property name="buddy">
+            <cstring>radio_name</cstring>
+           </property>
           </widget>
          </item>
          <item row="2" column="1">
@@ -388,12 +391,18 @@
            <property name="text">
             <string>ARTISTA</string>
            </property>
+           <property name="buddy">
+            <cstring>txt_artist</cstring>
+           </property>
           </widget>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_6">
            <property name="text">
             <string>TIPO</string>
+           </property>
+           <property name="buddy">
+            <cstring>cb_extension</cstring>
            </property>
           </widget>
          </item>
@@ -463,6 +472,9 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           </property>
+           <property name="buddy">
+            <cstring>txt_media</cstring>
            </property>
           </widget>
          </item>
@@ -866,6 +878,19 @@ hr { height: 1px; border-width: 0; }
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>radio_name</tabstop>
+  <tabstop>radio_url</tabstop>
+  <tabstop>txt_artist</tabstop>
+  <tabstop>cb_extension</tabstop>
+  <tabstop>txt_media</tabstop>
+  <tabstop>bt_append</tabstop>
+  <tabstop>list_media</tabstop>
+  <tabstop>bt_add</tabstop>
+  <tabstop>bt_download</tabstop>
+  <tabstop>tree_list</tabstop>
+  <tabstop>txt_output</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -24,9 +24,10 @@ class App(QMainWindow, Ui_MainWindow):
         # Instancia variáveis
         self.thread: QThread | None = None
         self.worker: Worker | None = None
+        self.path = ''
         self.data = {}
 
-        # Inicia aplicativo
+        # Inicia interface do aplicativo
         self.init_ui()
 
     def init_ui(self):
@@ -136,6 +137,10 @@ class App(QMainWindow, Ui_MainWindow):
             # Caso não haja outra media, remove o formato
             if not extension_data:
                 del artist_data[extension]
+
+                # Caso não haja outro formato, remove o artista
+                if not artist_data:
+                    del self.data[artist]
 
         # Recria tree list
         self.build_tree()
@@ -315,10 +320,10 @@ class App(QMainWindow, Ui_MainWindow):
             return
 
         # Pega caminho para salvar
-        path = QFileDialog.getSaveFileName(self, 'Salvar em', 'YT Downloader')[0]
+        self.path = QFileDialog.getSaveFileName(self, 'Salvar em', 'YT Downloader')[0]
 
         # Verifica se o caminho é válido
-        if not path:
+        if not self.path:
             Message.warning(self, 'ATENÇÃO', 'Nenhum diretório especificado.')
             return
 
@@ -327,7 +332,7 @@ class App(QMainWindow, Ui_MainWindow):
 
         # Prepara a thread que irá realizar os downloads
         self.thread = QThread()
-        self.worker = Worker(self.data, path)
+        self.worker = Worker(self.data, self.path)
         self.worker.moveToThread(self.thread)
 
         # Conecta eventos
@@ -362,12 +367,15 @@ class App(QMainWindow, Ui_MainWindow):
         if not force:
             Message.information(self, 'AVISO', 'Download concluído.')
 
-            self.bt_download.setDisabled(True)
+            # Abre a pasta de destino
+            os.system(f'explorer {self.path}')
 
             # Reseta dados
             self.progress_bar.setValue(0)
             self.tree_list.clear()
             self.data.clear()
+
+            self.bt_download.setDisabled(True)
 
 
 # Usado para auxiliar na depuração
@@ -383,7 +391,7 @@ if __name__ == "__main__":
         # noinspection PyUnresolvedReferences
         from ctypes import windll
 
-        myappid = 'pc.youtube_downloader.3.0.0'
+        myappid = 'pc.youtube_downloader.3.0.1'
         windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     except ImportError:
         pass
