@@ -22,8 +22,15 @@ __all__ = [
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 
 
-# Retorna dados antigos ou um objeto novo
-def get_old_data(data: dict, key: str, if_not_exists: list | dict):
+def get_old_data(data: dict, key: str, if_not_exists: list | dict) -> dict | list:
+    """
+    Retorna dados antigos ou um objeto novo.
+
+    :param data: Dados
+    :param key: Chave do dado
+    :param if_not_exists: O que retornar caso não exista um dado anterior
+    :return: Dado anterior ou objeto passado em "if_not_exists"
+    """
     try:
         old_data = data[key]
     except KeyError:
@@ -32,8 +39,13 @@ def get_old_data(data: dict, key: str, if_not_exists: list | dict):
     return old_data
 
 
-# Retorna quantidade de mídias
-def count_media(data: dict):
+def count_media(data: dict) -> int:
+    """
+     Retorna quantidade de mídias.
+
+    :param data: Dados da tree
+    :return: Quantidade de mídias
+    """
     count = 0
 
     for key, extensions in data.items():

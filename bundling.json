@@ -7,7 +7,7 @@
   },
   {
    "optionDest": "filenames",
-   "value": "C:/Users/User/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/main.py"
+   "value": "C:/Users/Paulo/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/main.py"
   },
   {
    "optionDest": "onefile",
@@ -19,7 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "C:/Users/User/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/assets/icon.ico"
+   "value": "C:/Users/Paulo/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/assets/icon.ico"
   },
   {
    "optionDest": "name",
@@ -27,7 +27,7 @@
   },
   {
    "optionDest": "upx_dir",
-   "value": "C:/upx-4.0.2-win64"
+   "value": "C:/upx"
   },
   {
    "optionDest": "ascii",
@@ -79,11 +79,12 @@
   },
   {
    "optionDest": "datas",
-   "value": "C:/Users/User/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/assets;assets/"
+   "value": "C:/Users/Paulo/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/assets;assets/"
   }
  ],
  "nonPyinstallerOptions": {
   "increaseRecursionLimit": true,
-  "manualArguments": ""
+  "manualArguments": "",
+  "outputDirectory": "C:/Users/Paulo/OneDrive/Programa\u00e7\u00e3o/Python/Projetos/Youtube Downloader/dist"
  }
 }
