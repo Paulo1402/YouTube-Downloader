@@ -1,8 +1,10 @@
+import functools
+
 from PyQt6.QtWidgets import QMessageBox
 
 
-# Template de QMessageBox com captions personalizados para botões
 class Message(QMessageBox):
+    """Template de QMessageBox com captions personalizados para botões"""
     YES = QMessageBox.StandardButton.Yes
     NO = QMessageBox.StandardButton.No
 
@@ -16,9 +18,16 @@ class Message(QMessageBox):
         if buttons:
             self.set_caption_buttons(buttons)
 
-    # Cria e executa uma message box de aviso com botões de Sim e Não
     @classmethod
-    def warning_question(cls, parent, message: str, default_button=QMessageBox.StandardButton.No):
+    def warning_question(cls, parent, message: str, default_button=QMessageBox.StandardButton.No) -> int:
+        """
+        Cria e executa uma message box de aviso com botões de Sim e Não.
+
+        :param parent: Parent
+        :param message: Mensagem para exibir
+        :param default_button: Botão padrão
+        :return: Resposta do usuário
+        """
         buttons = [(QMessageBox.StandardButton.Yes, 'Sim'), (QMessageBox.StandardButton.No, 'Não')]
 
         self = cls(parent, buttons)
@@ -31,14 +40,22 @@ class Message(QMessageBox):
 
         return answer
 
-    # Executa MessageBox
     def show_message(
             self,
             title: str,
             message: str,
             icon: QMessageBox.Icon | None = None,
             default_button: QMessageBox.StandardButton | None = None
-    ):
+    ) -> int:
+        """
+        Exibe a MessageBox.
+
+        :param title: Título do popup
+        :param message: Mensagem do popup
+        :param icon: Ícone do popup
+        :param default_button: Botão padrão
+        :return: Resposta do usuário
+        """
         self.setWindowTitle(title)
         self.setText(message)
         self.setIcon(icon)
@@ -46,13 +63,13 @@ class Message(QMessageBox):
 
         return super().exec()
 
-    # Seta captions personalizados
     def set_caption_buttons(self, buttons: list[tuple[QMessageBox.StandardButton, str]]):
-        b = 0
+        """
+        Seta captions personalizados.
 
-        for button, _ in buttons:
-            b |= button
-
+        :param buttons: Lista contendo tuplas, sendo o primeiro valor o Enum do botão e o segundo o caption
+        """
+        b = functools.reduce(lambda b, button: b | button[0], buttons, 0)
         self.setStandardButtons(b)
 
         for button, caption in buttons:

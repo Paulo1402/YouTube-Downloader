@@ -1,3 +1,8 @@
+"""
+Ponto de entrada do programa.
+
+Esse arquivo é compilado usando a lib PyInstaller para gerar um executável para distribuição.
+"""
 import sys
 import os
 import webbrowser
@@ -13,10 +18,18 @@ from ui.MainWindow import Ui_MainWindow
 from utils import *
 
 
-# Tela feita usando Qt Designer e convertida para Python com a biblioteca PyQt6 (pyuic6)
+# todo Features
+#  * Suporte para download de outras fontes usando youtube-dl
+#  * Suporte para selecionar qualidade da mídia
+# todo Refactoring
+#  Migrar código para PySide6
+#  (A maneira que o PyQt6 cria os arquivos .ui gera bugs envolvendo a localização de imagens. Encapsular recursos em
+#  um arquivo .qrc é melhor porém atualmente não há uma CLI para conversão desses arquivos para .py no PyQt6.)
 
-# Classe principal do aplicativo
-class App(QMainWindow, Ui_MainWindow):
+
+class MainWindow(QMainWindow, Ui_MainWindow):
+    """Janela principal do aplicativo."""
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -31,7 +44,7 @@ class App(QMainWindow, Ui_MainWindow):
         self.init_ui()
 
     def init_ui(self):
-        # Seta propriedades iniciais
+        """Seta propriedades iniciais."""
         self.cb_extension.setCurrentIndex(0)
         self.radio_name.setChecked(True)
         self.bt_download.setDisabled(True)
@@ -72,31 +85,40 @@ class App(QMainWindow, Ui_MainWindow):
             lambda pos: self.custom_context(self.list_media, self.remove_list_item, pos)
         )
 
-    # Evento disparado ao tentar fechar o aplicativo
     def closeEvent(self, event):
+        """Evento disparado ao tentar fechar o aplicativo."""
+
         # Se a thread estiver em execução
         if self.thread and self.thread.isRunning():
             if Message.warning_question(self, 'Processo em andamento!\nDeseja sair mesmo assim?') == Message.NO:
                 event.ignore()
                 return
 
-        self.finished_thread(force=True)
+        self.clean_setup()
         event.accept()
 
-    # Executa o botão de append caso os atalhos de teclado forem utilizados
     def handle_enter_pressed(self):
+        """Executa o botão de append caso os atalhos de teclado forem utilizados"""
         if not self.txt_media.hasFocus():
             return
 
         self.bt_append.animateClick()
 
-    # Remove item da list widget
     def remove_list_item(self, item: QListWidgetItem):
+        """
+        Remove item da list widget.
+
+        :param item: Item da lista
+        """
         row = self.list_media.row(item)
         self.list_media.takeItem(row)
 
-    # Remove item do dicionário de dados e refaz a tree list
     def remove_tree_item(self, item: QTreeWidgetItem):
+        """
+        Remove item do dicionário de dados e refaz a tree list.
+
+        :param item: Item para remover
+        """
         parent = item.parent()
 
         # Artista
@@ -145,8 +167,14 @@ class App(QMainWindow, Ui_MainWindow):
         # Recria tree list
         self.build_tree()
 
-    # Cria um context menu com opção para deletar item
     def custom_context(self, main_widget: QTreeWidget | QListWidget, remove_function: Callable, pos: QPoint):
+        """
+        Cria um context menu com opção para deletar item.
+
+        :param main_widget: Widget base para o context menu
+        :param remove_function: Função de remoção
+        :param pos: Posição do click
+        """
         if not main_widget.selectedItems():
             return
 
@@ -162,8 +190,8 @@ class App(QMainWindow, Ui_MainWindow):
         menu.move(pos)
         menu.show()
 
-    # Adiciona media ao list widget
     def append_media(self):
+        """Adiciona media ao list widget."""
         media: str = self.txt_media.text()
 
         if not media.strip():
@@ -174,8 +202,8 @@ class App(QMainWindow, Ui_MainWindow):
         self.txt_media.clear()
         self.txt_media.setFocus()
 
-    # Adiciona media ao dicionário de dados
     def add_media(self):
+        """Adiciona media ao dicionário de dados."""
         data = []
         artist: str = self.txt_artist.text()
         extension: str = self.cb_extension.currentText()
@@ -184,7 +212,7 @@ class App(QMainWindow, Ui_MainWindow):
         # Adiciona itens da list widget em uma lista temporária
         for i in range(self.list_media.count()):
             media = self.list_media.item(i).text()
-            is_url = is_youtube_url(media) or is_youtube_playlist_url(media)
+            is_url = is_youtube_url(media)
 
             # Verifica URL caso o modo de busca seja por URL
             if search_by_url and not is_url:
@@ -201,7 +229,7 @@ class App(QMainWindow, Ui_MainWindow):
                 Message.critical(
                     self,
                     'ATENÇÃO',
-                    'Um ou mais itens na lista de vídeos são URLS, porém a opcão de busca por nome está selecionada!\n'
+                    'Um ou mais itens na lista de vídeos são URLS, porém a opção de busca por nome está selecionada!\n'
                     'Remova os demais itens e escolha a opção de busca por URL.'
                 )
                 return
@@ -255,10 +283,17 @@ class App(QMainWindow, Ui_MainWindow):
         # Recria tree list
         self.build_tree()
 
-    # Cria tree_list
     def build_tree(self):
-        # Cria um novo item derivado do item pai
+        """Cria tree_list."""
+
         def fill_item(item: QTreeWidgetItem, data: list | dict, url_flag: bool = False):
+            """
+            Cria um novo item derivado do item pai.
+
+            :param item: Item base
+            :param data: Dados para preencher
+            :param url_flag: Caso o conteúdo de data for URLs
+            """
             # Expande item
             item.setExpanded(True)
 
@@ -303,8 +338,9 @@ class App(QMainWindow, Ui_MainWindow):
         else:
             self.bt_download.setDisabled(True)
 
-    # Baixa lista do YouTube
     def download(self):
+        """Baixa lista do YouTube."""
+
         # Verifica se o processo está em andamento
         if self.thread and self.thread.isRunning():
             Message.warning(self, 'ATENÇÃO', 'Já existe um processo em andamento, por favor aguarde.')
@@ -319,8 +355,10 @@ class App(QMainWindow, Ui_MainWindow):
         if Message.warning_question(self, 'Deseja fazer o download?') == Message.NO:
             return
 
+        home = os.getenv('USERPROFILE')
+
         # Pega caminho para salvar
-        self.path = QFileDialog.getSaveFileName(self, 'Salvar em', 'YT Downloader')[0]
+        self.path = QFileDialog.getSaveFileName(self, 'Salvar em', os.path.join(home, 'Downloads', 'YT Downloader'))[0]
 
         # Verifica se o caminho é válido
         if not self.path:
@@ -344,8 +382,12 @@ class App(QMainWindow, Ui_MainWindow):
         # Inicia o download
         self.thread.start()
 
-    # Printa no terminal informações
     def print_on_terminal(self, text: str):
+        """
+        Printa dados no terminal.
+
+        :param text: Texto para inserir no terminal
+        """
         self.txt_output.append(text)
 
         # Move cursor para o fim do texto
@@ -354,37 +396,37 @@ class App(QMainWindow, Ui_MainWindow):
 
         self.txt_output.setTextCursor(cursor)
 
-    # Elimina variáveis da memória e informa o usuário
-    def finished_thread(self, force=False):
-        # Elimina variáveis
+    def clean_setup(self):
+        """Elimina variáveis."""
         if self.thread and self.worker:
             self.thread.quit()
             self.thread.deleteLater()
             self.worker.deleteLater()
             self.thread = None
 
-        # Informa o usuário que o processo terminou
-        if not force:
-            Message.information(self, 'AVISO', 'Download concluído.')
+    def finished_thread(self):
+        """Elimina variáveis da memória e informa o usuário"""
+        self.clean_setup()
+        Message.information(self, 'AVISO', 'Download concluído.')
 
-            # Abre a pasta de destino
-            os.system(f'explorer {self.path}')
+        # Abre a pasta de destino (Explorer só funciona com a barra invertida)
+        path = self.path.replace('/', '\\')
+        os.popen(f'explorer "{path}"')
 
-            # Reseta dados
-            self.progress_bar.setValue(0)
-            self.tree_list.clear()
-            self.data.clear()
+        # Reseta dados
+        self.progress_bar.setValue(0)
+        self.tree_list.clear()
+        self.data.clear()
 
-            self.bt_download.setDisabled(True)
+        self.bt_download.setDisabled(True)
 
 
-# Usado para auxiliar na depuração
-def exception_hook(exctype, value, traceback):
-    sys.__excepthook__(exctype, value, traceback)
+def exception_hook(*args, **kwargs):
+    """Custom hook para receber exceptions vindas do C++(QT) durante desenvolvimento"""
+    sys.__excepthook__(*args, **kwargs)
     sys.exit(1)
 
 
-# Inicia o aplicativo
 if __name__ == "__main__":
     # Evita bug no ícone na barra de tarefas quando compilado
     try:
@@ -398,11 +440,11 @@ if __name__ == "__main__":
 
     sys.excepthook = exception_hook
 
-    qt = QApplication(sys.argv)
-    qt.setStyle('Fusion')
-    qt.setWindowIcon(QIcon(os.path.join(BASEDIR, 'assets/icon-48.png')))
+    app = QApplication(sys.argv)
+    app.setStyle('Fusion')
+    app.setWindowIcon(QIcon(os.path.join(BASEDIR, 'assets/icon-48.png')))
 
-    app = App()
-    app.show()
+    window = MainWindow()
+    window.show()
 
-    sys.exit(qt.exec())
+    sys.exit(app.exec())

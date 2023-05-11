@@ -49,8 +49,8 @@ basta usar o botão direito do mouse e clicar em `Deletar`.
 - Botão adicionar (CTRL + A).
 - Botão inserir mídia (ENTER quando estiver com o campo `VÍDEOS` em foco).
 
-
 ## ⚙ Funcionalidades
+- Downloads são sempre feitos na maior qualidade possível.
 - Terminal para manter usuário informado durante o processo.
 - Mantem organizado os downloads seguindo a estrutura visual da lista.
 - Caso algum erro ocorra durante o download é criado um arquivo de log com informações sobre o erro na pasta de destino.

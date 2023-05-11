@@ -9,6 +9,8 @@ import utils
 
 
 class Worker(QObject):
+    """Worker para realizar download em segundo plano."""
+
     # Cria eventos
     print_on_terminal = pyqtSignal(str)
     progress = pyqtSignal(int)
@@ -24,6 +26,8 @@ class Worker(QObject):
         self.logger: logging.Logger | None = None
 
     def run(self):
+        """Implementação para executar o worker."""
+
         # Salva início da thread
         start_time = datetime.now()
         self.to_html(before='Preparando para começar...')
@@ -57,7 +61,18 @@ class Worker(QObject):
         self.finished.emit()
 
     def download_medias(self):
+        """Prepara estrutura para download."""
+
         def download(key: str, media: str, extension: str, path: str):
+            """
+            Realiza o download para cada media.
+
+            :param key: Chave da media
+            :param media: Nome ou URL da media
+            :param extension: Extensão da media
+            :param path: Caminho para saída
+            """
+
             nonlocal count, err_count
 
             media_name = f'{key} - {media}'
@@ -66,6 +81,7 @@ class Worker(QObject):
             try:
                 # Caso seja uma url tenta converter diretamente para um objeto de vídeo
                 if key == 'urls':
+
                     # Se for uma playlist chama a função recursivamente para cada item da playlist
                     if utils.is_youtube_playlist_url(media):
                         playlist = Playlist(media)
@@ -155,8 +171,8 @@ class Worker(QObject):
 
         return err_count
 
-    # Cria arquivo de log
     def create_logger(self):
+        """Cria arquivo de log."""
         formatter = logging.Formatter('%(asctime)s - %(message)s', datefmt='%d/%m/%y %H:%M:%S')
 
         handler = logging.FileHandler(os.path.join(self.root, '.log'), 'w')
@@ -166,8 +182,14 @@ class Worker(QObject):
         self.logger = logging.getLogger(__name__)
         self.logger.addHandler(handler)
 
-    # Monta a estrutura em HTML
     def to_html(self, before: str = '', highlight: tuple[str, str] = None, after: str = ''):
+        """
+        Monta a estrutura em HTML.
+
+        :param before: Conteúdo para inserir antes do highlight
+        :param highlight: Conteúdo para destaque
+        :param after: Conteúdo para inserir depois do highlight
+        """
         html = f'<p style="line-height:1">{before}'
 
         if highlight:

@@ -7,16 +7,16 @@ from utils.message import Message
 
 
 __all__ = [
+    'BASEDIR',
+    'Worker',
+    'Message',
     'remove_forbidden_characters',
     'check_connection',
     'get_old_data',
     'sort_dict',
     'count_media',
     'is_youtube_url',
-    'is_youtube_playlist_url',
-    'BASEDIR',
-    'Worker',
-    'Message'
+    'is_youtube_playlist_url'
 ]
 
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
@@ -44,20 +44,37 @@ def count_media(data: dict):
     return count
 
 
-# Verifica se é um link de vídeo do YouTube
-def is_youtube_url(url: str):
-    match = re.match(r"http(s)?://(www.)?youtube\.com/watch\?v=|youtu\.be/", url)
+def is_youtube_url(url: str) -> bool:
+    """
+    Verifica se é uma URL do YouTube.
+
+    :param url: URL como string
+    :return: True se for YouTube, do contrário False
+    """
+    match = re.match(r'(^http(s)?://(www.)?(youtube\.com/(watch\?v=|playlist\?list=)|youtu\.be/)\S+$)', url)
     return bool(match)
 
 
-# Verifica se é um link de playlist do YouTube
 def is_youtube_playlist_url(url: str):
-    match = re.match(r'http(s)?://(www.)?youtube\.com/playlist\?list=', url)
+    """
+    Verifica se é uma URL do YouTube.
+
+    :param url: URL como string
+    :return: True se for playlist do YouTube, do contrário False
+    """
+    match = re.match(r'(^http(s)?://(www.)?youtube\.com/playlist\?list=\S+$)', url)
     return bool(match)
 
 
-# Organiza dados
-def sort_dict(data: tuple):
+def sort_dict(data: tuple) -> str:
+    """
+    Organiza dados por ordem alfabética.
+    Força com que "no_artist" e "urls" sejam as últimas chaves.
+
+    :param data: Tupla com dados
+    :return: Caractere para definir ordem
+    """
+
     if data[0] == 'no_artist':
         return 'z' * 100
     elif data[0] == 'urls':
@@ -66,8 +83,13 @@ def sort_dict(data: tuple):
         return data[0]
 
 
-# Remove caracteres proibidos no Windows
 def remove_forbidden_characters(file_name: str) -> str:
+    """
+    Remove caracteres proibidos no Windows.
+
+    :param file_name: Nome do arquivo
+    :return: Nome do arquivo sem caracteres proibidos
+    """
     forbidden_characters = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
     new_file_name = ''
 
@@ -78,12 +100,14 @@ def remove_forbidden_characters(file_name: str) -> str:
     return new_file_name if new_file_name else file_name
 
 
-# Checa se o usuário está conectado a internet
-def check_connection():
+def check_connection() -> bool:
+    """
+    Checa se o usuário está conectado a internet.
+
+    :return: True se houver conexão, do contrário False
+    """
     try:
         socket.create_connection(('www.google.com', 80))
         return True
     except OSError:
-        pass
-
-# https://youtube.com/playlist?list=PLdv7EOMbqaGeSB14ixFfO-ksE2hj120A-
+        return False
