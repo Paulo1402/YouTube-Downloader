@@ -433,7 +433,7 @@ if __name__ == "__main__":
         # noinspection PyUnresolvedReferences
         from ctypes import windll
 
-        myappid = 'pc.youtube_downloader.3.0.1'
+        myappid = 'pc.youtube_downloader.3.0.2'
         windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     except ImportError:
         pass
